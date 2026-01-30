@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>FilmXR | Frustrain Trainman</title>
+    <meta name="description" content="">
+    <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="stylesheet" href="TemplateData/style.css">
+  </head>
+  <body style="overflow: hidden";>
+    <div id="unity-container">
+      <div id="unity-canvas-container" style="width: 100%; height: 100%;">
+        <canvas id="unity-canvas" style="width: 100%; height: 100%;"></canvas>
+      </div>
+      <div id="unity-loading-bar">
+        <div id="unity-logo"></div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+      <div id="unity-footer" style="display: flex; flex-direction: row; bottom: 8px;">
+        <button id="entervr" value="Enter VR" disabled style="background-color: unset; padding-left: 180px;" title="Enter VR mode">
+          <svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M3 12.4897C3 10.2381 3.89445 8.07871 5.48658 6.48658C7.07871 4.89445 9.2381 4 11.4897 4H19.6103C21.8619 4 24.0213 4.89445 25.6134 6.48658C27.2056 8.07871 28.1 10.2381 28.1 12.4897C28.1 14.7413 27.2056 16.9007 25.6134 18.4928C24.0213 20.085 21.8619 20.9794 19.6103 20.9794H11.4897C10.3748 20.9794 9.27085 20.7598 8.24084 20.3332C7.21082 19.9065 6.27492 19.2812 5.48658 18.4928C3.89445 16.9007 3 14.7413 3 12.4897ZM11.4897 14.3353C11.9792 14.3353 12.4486 14.1408 12.7947 13.7947C13.1408 13.4486 13.3353 12.9792 13.3353 12.4897C13.3353 12.0002 13.1408 11.5308 12.7947 11.1847C12.4486 10.8386 11.9792 10.6441 11.4897 10.6441C11.0002 10.6441 10.5308 10.8386 10.1847 11.1847C9.83856 11.5308 9.64412 12.0002 9.64412 12.4897C9.64412 12.9792 9.83856 13.4486 10.1847 13.7947C10.5308 14.1408 11.0002 14.3353 11.4897 14.3353ZM21.4559 12.4897C21.4559 12.9792 21.2614 13.4486 20.9153 13.7947C20.5692 14.1408 20.0998 14.3353 19.6103 14.3353C19.1208 14.3353 18.6514 14.1408 18.3053 13.7947C17.9592 13.4486 17.7647 12.9792 17.7647 12.4897C17.7647 12.0002 17.9592 11.5308 18.3053 11.1847C18.6514 10.8386 19.1208 10.6441 19.6103 10.6441C20.0998 10.6441 20.5692 10.8386 20.9153 11.1847C21.2614 11.5308 21.4559 12.0002 21.4559 12.4897Z" fill="#D5E2F2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <video id="gameVideo" playsinline muted webkit-playsinline style="
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: none;
+      z-index: 10;">
+      <source src="TemplateData/FrustrainIntro4_webgl.mp4" type="video/mp4">
+  </video>
+
+    <!-- Error Modal -->
+    <div id="error-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="error-modal-title">
+      <div id="error-modal">
+        <h2 id="error-modal-title">Application Error</h2>
+        <pre id="error-modal-text"></pre>
+        <button id="error-modal-close" type="button">Close</button>
+      </div>
+    </div>
+
+    <script>
+
+      function PlayGameVideo() {
+          const v = document.getElementById('gameVideo');
+          v.style.display = 'block';
+          v.play();
+      }
+
+      function HideGameVideo() {
+          const v = document.getElementById('gameVideo');
+          v.pause();
+          v.style.display = 'none';
+      }
+
+
+      // Modal helpers
+      function showError(message) {
+        const bd = document.getElementById('error-modal-backdrop');
+        const txt = document.getElementById('error-modal-text');
+        if (txt) txt.textContent = (message || 'Unknown error');
+        if (bd) bd.style.display = 'flex';
+      }
+      function hideError() {
+        const bd = document.getElementById('error-modal-backdrop');
+        if (bd) bd.style.display = 'none';
+      }
+      document.getElementById('error-modal-close')?.addEventListener('click', hideError);
+
+
+      var buildUrl = "Build";
+      var loaderUrl = buildUrl + "/Train_test.github.io.loader.js";
+      var config = {
+        dataUrl: buildUrl + "/Train_test.github.io.data.unityweb",
+        frameworkUrl: buildUrl + "/Train_test.github.io.framework.js.unityweb",
+        codeUrl: buildUrl + "/Train_test.github.io.wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Film XR",
+        productName: "Frustrain Trainman",
+        productVersion: "1.0",
+      };
+
+      var container = document.querySelector("#unity-container");
+      var canvas = document.querySelector("#unity-canvas");
+      var canvasContainer = document.querySelector("#unity-canvas-container");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
+      var unityInstance = null;
+
+      
+
+      loadingBar.style.display = "block";
+
+      var script = document.createElement("script");
+      script.src = loaderUrl;
+      script.onload = () => {
+        createUnityInstance(canvas, config, (progress) => {
+          progressBarFull.style.width = 100 * progress + "%";
+        }).then((instance) => {
+          unityInstance = instance;
+          loadingBar.style.display = "none";
+          if (fullscreenButton)
+          {
+            fullscreenButton.onclick = () => {
+              unityInstance.SetFullscreen(1);
+            };
+          }
+        }).catch((message) => {
+          showError(message);
+          //alert(message);
+        });
+      };
+      document.body.appendChild(script);
+
+      let enterVRButton = document.getElementById('entervr');
+
+      document.addEventListener('onVRSupportedCheck', function (event) {
+        enterVRButton.disabled = !event.detail.supported;
+      }, false);
+
+      enterVRButton.addEventListener('click', function (event) {
+        unityInstance.Module.WebXR.toggleVR();
+      }, false);
+    </script>
+  </body>
+</html>
