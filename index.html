@@ -3,24 +3,43 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | WebRoom</title>
+    <title>WebRoom | Interactive Experience</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="TemplateData/style.css">
   </head>
   <body>
+    <div id="bg-glow-1"></div>
+    <div id="bg-glow-2"></div>
+    
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
+      <div id="unity-canvas-wrapper">
+        <canvas id="unity-canvas" width="960" height="600" tabindex="-1"></canvas>
+        
+        <div id="unity-loading-bar">
+          <div id="loading-header">
+            <span id="loading-title">SYSTEM LOAD</span>
+            <span id="unity-progress-text">0%</span>
+          </div>
+          <div id="unity-progress-bar-empty">
+            <div id="unity-progress-bar-full"></div>
+          </div>
+          <div id="loading-status">INITIALIZING SYSTEM...</div>
         </div>
       </div>
+      
       <div id="unity-warning"> </div>
+      
       <div id="unity-footer">
         <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
         <div id="unity-build-title">WebRoom</div>
+        <div id="unity-fullscreen-button" title="Toggle Fullscreen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
+          </svg>
+        </div>
       </div>
     </div>
     <script>
@@ -40,9 +59,9 @@
         var div = document.createElement('div');
         div.innerHTML = msg;
         warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
+        if (type == 'error') div.style = 'background: #ff0055; padding: 12px; color: #fff; box-shadow: 0 0 15px rgba(255, 0, 85, 0.4); border-radius: 4px; font-family: Outfit, sans-serif;';
         else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
+          if (type == 'warning') div.style = 'background: #ffaa00; padding: 12px; color: #000; box-shadow: 0 0 15px rgba(255, 170, 0, 0.4); border-radius: 4px; font-family: Outfit, sans-serif;';
           setTimeout(function() {
             warningBanner.removeChild(div);
             updateBannerVisibility();
@@ -108,23 +127,38 @@
         canvas.style.height = "600px";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+      document.querySelector("#unity-loading-bar").style.display = "flex";
 
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
-
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+          var percentage = Math.round(100 * progress);
+          document.querySelector("#unity-progress-bar-full").style.width = percentage + "%";
+          var progressText = document.querySelector("#unity-progress-text");
+          if (progressText) progressText.textContent = percentage + "%";
+          
+          var statusText = document.querySelector("#loading-status");
+          if (statusText) {
+            if (percentage < 30) {
+              statusText.textContent = "INITIALIZING CORE SYSTEM...";
+            } else if (percentage < 70) {
+              statusText.textContent = "LOADING GRAPHICAL ASSETS...";
+            } else if (percentage < 90) {
+              statusText.textContent = "COMPILING SHADERS...";
+            } else {
+              statusText.textContent = "STARTING INTERACTIVE EXPERIENCE...";
+            }
+          }
+        }).then((unityInstance) => {
+          document.querySelector("#unity-loading-bar").style.display = "none";
+          document.querySelector("#unity-fullscreen-button").onclick = () => {
+            unityInstance.SetFullscreen(1);
+          };
+        }).catch((message) => {
+          alert(message);
+        });
+      };
 
       document.body.appendChild(script);
 
