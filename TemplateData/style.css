@@ -94,9 +94,9 @@ body {
 }
 
 #unity-container.unity-mobile {
-  position: fixed;
-  width: 100%;
-  height: 100%;
+  position: relative;
+  width: 100vw;
+  height: 100vh;
   padding: 0;
   border: none;
   border-radius: 0;
@@ -402,8 +402,12 @@ body {
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Hide on mobile viewport */
-.unity-mobile ~ #vvarp-footer,
-.unity-mobile #vvarp-footer {
-  display: none !important;
+body.mobile-body {
+  padding: 0;
+}
+
+body.mobile-body #vvarp-footer {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  width: calc(100% - 32px);
 }
